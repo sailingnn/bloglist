@@ -57,6 +57,23 @@ const mostBlogs = (blogs) => {
     return max
 }
 
+const mostLikes = (blogs) => {
+    const count = _.chain(blogs)
+                    .groupBy('author')
+                    .transform((result, value, key) => {
+                        const tmpnum = _.sumBy(value, 'likes')
+                        // console.log('tmpnum:', tmpnum, key)
+                        result.push({
+                            author: key, 
+                            likes: tmpnum
+                        })                   
+                    }, [])
+                    .maxBy('likes')
+                    .value()
+    // console.log('count:', count)
+    return count
+}
+
   module.exports = {
-    dummy, totalLikes, favoriteBlog, mostBlogs
+    dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes
   }
