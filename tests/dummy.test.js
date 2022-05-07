@@ -363,12 +363,12 @@ describe('total likes', () => {
         likes: 17
     }
     // console.log('blogs:', blogs)
-    test.only('when list has only one blog, equals the person with the most blog number of that', () => {
+    test('when list has only one blog, equals the person with the most blog number of that', () => {
       const result = listHelper.mostLikes(listWithOneBlog)
       expect(result).toEqual(ans1)
     })
 
-    test.only('when list has many blogs, equals the person with the most blog number of that', () => {
+    test('when list has many blogs, equals the person with the most blog number of that', () => {
         const result = listHelper.mostLikes(blogs)
         expect(result).toEqual(ans2)
       })
@@ -379,7 +379,7 @@ describe('total likes', () => {
     //     expect(result.blogs).toBe(3)
     // })
 
-    test.only('when list is empty, equals the person with the most blog number of that', () => {
+    test('when list is empty, equals the person with the most blog number of that', () => {
         const result = listHelper.mostLikes(emptyList)
         expect(result).toEqual(undefined)
     })
