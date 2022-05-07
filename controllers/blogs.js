@@ -1,5 +1,5 @@
 const blogsRouter = require('express').Router()
-const { response } = require('../app')
+// const { response } = require('../app')
 const Blog = require('../models/blog')
 
 // route handler using promises
@@ -31,10 +31,23 @@ blogsRouter.get('/', async (request, response) => {
 //         })
 // })
 
+// blogsRouter.post('/', async (request, response, next) => {
 blogsRouter.post('/', async (request, response) => {
-  const blog = new Blog(request.body)
-  const result = await blog.save()
-  response.status(201).json(result)
+  const body = request.body
+  const blog = new Blog({
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes || 0,
+  })
+
+  // console.log('blog:', blog)
+  // try{
+    const result = await blog.save()
+    response.status(201).json(result)
+  // }catch(exception){
+  //   next(exception)
+  // }
 })
 
 module.exports = blogsRouter

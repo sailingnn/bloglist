@@ -16,6 +16,7 @@ const initialBlogs = [
     title: "Go To Statement Considered Harmful",
     author: "Edsger W. Dijkstra",
     url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
+    likes: 5,
   },
 ]
 
@@ -48,7 +49,7 @@ test('the unique identifier property of the blog posts is named id', async () =>
   response.body.map(n => expect(n.id).toBeDefined)
 })
 
-test.only('a valid new blog post can be added', async () => {
+test('a valid new blog post can be added', async () => {
   const newBlog = {
     title: "First class tests",
     author: "Robert C. Martin",
@@ -69,6 +70,36 @@ test.only('a valid new blog post can be added', async () => {
     'First class tests'
   )
 }, 100000)
+
+test('if the likes property is missing from the request, it will default to the value 0', async () => {
+  const newBlog = {
+    title: "First class tests",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+  }
+  const response = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)  //this doesn't matter
+      .expect('Content-Type', /application\/json/)
+
+  console.log('reponse.body:', response.body)
+  expect(response.body.likes).toBe(0) 
+})
+
+test.only('if the title and url properties are missing, it will not be added', async () => {
+  const newBlog = {
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400) 
+
+  const response = await api.get('/api/blogs')  
+  expect(response.body).toHaveLength(initialBlogs.length)
+})
 
 afterAll(() => {
   mongoose.connection.close()
