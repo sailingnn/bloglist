@@ -1,10 +1,11 @@
-const middleware = require('../utils/middleware')
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable prefer-destructuring */
 const blogsRouter = require('express').Router()
+const middleware = require('../utils/middleware')
 // const { response } = require('../app')
 const Blog = require('../models/blog')
 // const User = require('../models/user')
 // const jwt = require('jsonwebtoken')
-
 
 // route handler using promises
 // blogsRouter.get('/', (request, response) => {
@@ -20,7 +21,7 @@ blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
     .find({}).populate('user', { username: 1, name: 1 })
   response.json(blogs)
-})  
+})
 
 // route handler using promises
 // blogsRouter.post('/', (request, response) => {
@@ -46,30 +47,32 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
     author: body.author,
     url: body.url,
     likes: body.likes || 0,
-    user: user._id
+    // eslint-disable-next-line no-underscore-dangle
+    user: user._id,
   })
 
   // console.log('blog:', blog)
   // try{
-    const result = await blog.save()
-    // console.log('result:', result)
+  const result = await blog.save()
+  // console.log('result:', result)
 
-    user.blogs = (user.blogs|| []).concat(result._id)
-    await user.save()
+  // eslint-disable-next-line no-underscore-dangle
+  user.blogs = (user.blogs || []).concat(result._id)
+  await user.save()
 
-    response.status(201).json(result)
+  response.status(201).json(result)
   // }catch(exception){
   //   next(exception)
   // }
 })
 
 blogsRouter.get('/:id', async (request, response) => {
-    const blog = await Blog.findById(request.params.id)
-    if (blog) {
-      response.json(blog)
-    } else {
-      response.status(404).end()
-    }
+  const blog = await Blog.findById(request.params.id)
+  if (blog) {
+    response.json(blog)
+  } else {
+    response.status(404).end()
+  }
 })
 
 // blogsRouter.delete('/:id', async (request, response) => {
@@ -79,12 +82,12 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) =
   const user = request.user
   // console.log('user of delete:', user)
   const blogToDelete = await Blog.findById(request.params.id)
-  if(user._id.toString() === blogToDelete.user.toString()){
+  if (user._id.toString() === blogToDelete.user.toString()) {
     await Blog.findByIdAndRemove(request.params.id)
     response.status(204).end()
-  } else{
-    return response.status(401).json({ error: 'wrong user attmpt' })
-  }    
+  } else {
+    response.status(401).json({ error: 'wrong user attmpt' })
+  }
 })
 
 blogsRouter.put('/:id', middleware.userExtractor, async (request, response) => {
@@ -96,20 +99,21 @@ blogsRouter.put('/:id', middleware.userExtractor, async (request, response) => {
   // console.log('body:', body)
   // console.log('user._id', user._id)
   // console.log('blogToUpdate.user', blogToUpdate.user)
-  
+
   const blog = {
     title: body.title,
     author: body.author,
     url: body.url,
     // user: blogToUpdate.user,
-    likes: body.likes
+    likes: body.likes,
   }
-  if(user._id.toString() === blogToUpdate.user.toString()){
-    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true, runValidators: true })
+  if (user._id.toString() === blogToUpdate.user.toString()) {
+    const para = { new: true, runValidators: true }
+    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, para)
     // console.log('sucess!', updatedBlog)
     response.json(updatedBlog)
-  } else{
-    return response.status(401).json({ error: 'wrong user attmpt' })
+  } else {
+    response.status(401).json({ error: 'wrong user attmpt' })
   }
 })
 
