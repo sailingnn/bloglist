@@ -1,4 +1,7 @@
+// const { response } = require('../app')
 const logger = require('./logger')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 const tokenExtractor = (request, response, next) => {
   const authorization = request.get('authorization')
@@ -11,14 +14,34 @@ const tokenExtractor = (request, response, next) => {
   next()
 }
 
+const userExtractor = async (request, response, next) => {
+  // console.log('userExtractor called...')
+  // console.log('test token:', request.token)
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+  // console.log('decodedToken.id', decodedToken.id)
+  request.user = await User.findById(decodedToken.id)
+  request.extracted = true
+  // console.log('request.user.name', request.user.name)
+  // console.log('request.user._id', request.user._id)
+  next()
+}
+
 const errorHandler = (error, request, response, next) => {
-    logger.error(error.message)
-  
+    // logger.error(error.message)
+    // logger.error(error.name)
     if (error.name === 'CastError') {
       return response.status(400).send({ error: 'malformatted id' })
     } else if (error.name === 'ValidationError') {
       return response.status(400).json({ error: error.message })
     } else if (error.name === 'JsonWebTokenError') {
+        if (error.message === 'jwt must be provided'){
+          return response.status(401).json({
+            error: 'Unauthorized'
+          })
+        }
         return response.status(401).json({
             error: 'invalid token'
         })
@@ -27,5 +50,5 @@ const errorHandler = (error, request, response, next) => {
 }
   
 module.exports = {
-  errorHandler, tokenExtractor
+  errorHandler, tokenExtractor, userExtractor
 }
